@@ -1,2 +1,2 @@
-# The-thesis-code
+# Master-thesis
 Studying Traits Relationship in Randomly Evolving Environment using non-Gaussian type Statistical Model: an Approximate Bayesian Computation Approach
