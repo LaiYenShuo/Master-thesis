@@ -64,8 +64,7 @@ ououcirmodel<-function(model.params,reg.params,root=root,tree=tree){
 
     a <- rnorm(n=1, mean=0, sd=sqrt(theta.tau^2*(exp(2*alpha.y*treelength[index])-1)/(2*alpha.y)))
     b <- rnorm(n=1, mean=0, sd=sqrt(((sigmasqnodestates[des[index]]-theta.tau)^2/(2*(alpha.y-alpha.tau)))*(exp(2*(alpha.y-alpha.tau)*treelength[index])-1)))
-# n_t=30
-# n_s=30
+
 n_t=20
 n_s=20
       outer.int.sum=0
@@ -140,91 +139,3 @@ sum.stat.distance<-function(raw.sum.stat=raw.sum.stat,sim.sum.stat=sim.sum.stat)
   sim.sum.stat <- sim.sum.stat/median(sim.sum.stat-median(sim.sum.stat))
   return(sum((raw.sum.stat-sim.sum.stat)^2))
 }
-# ### main
-# n<-20
-# numbsim<-1;lambda<-2.0;mu<-0.5;frac<-0.6;age<-2
-# tree<-sim.bd.taxa.age(n=n,numbsim=1,lambda=lambda,mu=mu,frac=frac,age=age,mrca=TRUE)[[1]]
-# tree<-reorder(tree,"postorder")
-# tree$edge
-# plot(tree)
-# nodelabels()
-# tiplabels()
-# 
-# root<-1
-# true.alpha.y<-1
-# true.alpha.x<-0.2
-# true.theta.x<-0.5
-# true.sigma.x<-2
-# true.alpha.tau<-0.5
-# true.theta.tau<-3
-# true.sigma.tau<-2
-# n_t<-10
-# n_s<-10
-# true.b0 <- 0
-# true.b1 <- 1
-# true.b2 <- 0.2
-# # hyper paramters
-# alpha.y.rate <-5# assume exponential
-# alpha.x.rate <- 5# assume exponential
-# theta.x.mean <- 0# assume normal
-# theta.x.sd  <- 1
-# sigma.x.shape <-2# assume invgamma
-# sigma.x.scale <-1
-# alpha.tau.rate <- 5# assume exponential
-# theta.tau.a <- 0 #assume uniform
-# theta.tau.b <- 100
-# sigma.tau.shape <- 2# assume inv gamma
-# sigma.tau.scale <- 1
-# b0.min=-5
-# b0.max=5
-# b1.min=-5
-# b1.max=5
-# b2.min=-5
-# b2.max=5
-# 
-# prior.model.params=c(alpha.y.rate, alpha.x.rate, theta.x.mean, theta.x.sd, sigma.x.shape, sigma.x.scale, alpha.tau.rate, theta.tau.a, theta.tau.b, sigma.tau.shape, sigma.tau.scale)
-# names(prior.model.params)<-c("alpha.y.rate", "alpha.x.rate", "theta.x.mean", "theta.x.sd", "sigma.x.shape", "sigma.x.scale", "alpha.tau.rate", "theta.tau.a", "theta.tau.b", "sigma.tau.shape", "sigma.tau.scale")
-# prior.reg.params=c(b0.min, b0.max, b1.min, b1.max, b2.min, b2.max)
-# prior.params <- ououcirprior(prior.model.params = prior.model.params, prior.reg.params=prior.reg.params)
-# 
-# true.trait <- ououcirmodel(model.params = c(true.alpha.y, true.alpha.x, true.theta.x, true.sigma.x, true.alpha.tau, true.theta.tau, true.sigma.tau),reg.params = c(true.b0,true.b1,true.b2), root=root, tree=tree)
-# sim.trait <- ououcirmodel(model.params = prior.params$model.params, reg.params = prior.params$reg.params, root=root, tree=tree)
-# 
-# raw.sum.stat.y <- sum.stat(trait = true.trait$y, tree=tree)
-# raw.sum.stat.x1 <- sum.stat(trait = true.trait$x1, tree=tree)
-# raw.sum.stat.x2 <- sum.stat(trait = true.trait$x2, tree=tree)
-# sims=50000
-# sim.ououcir.trait<-array(0,c(n,3,sims))
-# model.params.array<-array(0,c(7,sims))
-# rownames(model.params.array)<-c("alpha.y", "alpha.x", "theta.x", "sigma.x","alpha.tau","theta.tau","sigma.tau")
-# reg.params.array<-array(0,c(3,sims))
-# row.names(reg.params.array)<-c("b0", "b1", "b2")
-# y.sum.stat.array<-array(0,c(2,sims))
-# rownames(y.sum.stat.array)<-c("y.mean","y.sd")
-# x1.sum.stat.array<-array(0,c(2,sims))
-# rownames(x1.sum.stat.array)<-c("x1.mean","x1.sd")
-# x2.sum.stat.array<-array(0,c(2,sims))
-# rownames(x2.sum.stat.array)<-c("x2.mean","x2.sd")
-# 
-# prior.params <- ououcirprior(prior.model.params = prior.model.params, prior.reg.params = prior.reg.params)
-# sum.stat.distance.array<-array(0,c(sims))
-# for(simIndex in 1:sims){
-#   if(simIndex %%1000==0){print(simIndex)}
-#   prior.params<-ououcirprior(prior.model.params = prior.model.params, prior.reg.params = prior.reg.params)
-#   model.params.array[,simIndex]<-prior.params$model.params#for record only
-#   reg.params.array[,simIndex]<-prior.params$reg.params#for record only
-#   
-#   sim.trait <-ououcirmodel(model.params=prior.params$model.params,reg.params=prior.params$reg.params,root=root,tree=tree)
-#   sim.ououcir.trait[,1,simIndex]<-sim.trait$y
-#   sim.ououcir.trait[,2,simIndex]<-sim.trait$x1
-#   sim.ououcir.trait[,3,simIndex]<-sim.trait$x2
-#   y.sum.stat.array[,simIndex]<- sum.stat(trait=sim.trait$y,tree=tree)
-#   x1.sum.stat.array[,simIndex]<- sum.stat(trait=sim.trait$x1,tree=tree)
-#   x2.sum.stat.array[,simIndex]<- sum.stat(trait=sim.trait$x2,tree=tree)
-# }# end of loop
-# ### Use abc package
-# sim.sum.stat <- cbind(t(y.sum.stat.array),t(x1.sum.stat.array),t(x2.sum.stat.array))
-# ououcir.par.sim <- cbind(t(model.params.array),t(reg.params.array))
-# setwd("/Users/TerryLai/Dropbox/TerryLai/R_code/abc_V2")
-# #setwd("~/Dropbox/FCU/Teaching/Mentoring/2017Spring/TerryLai/R_code/abc_V2/")
-# save.image("test_ououcir.RData")
