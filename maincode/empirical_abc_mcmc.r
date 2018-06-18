@@ -11,12 +11,11 @@ library(abc)
 source("~/Dropbox/TerryLai/R_code/abcmcmc/ouest_Tony.R")
 abcmcmc <- function(tree=tree, resptrait=resptrait, predtrait1=predtrait1,predtrait2=predtrait2, iterations=iterations, errorbound=errorbound, model=model){
   if(model == "oubmbm"){
-    #source("/Users/Administrator/Dropbox/TerryLai/R_code/abcmcmc/oubmbmabcmcmc.r")
+    
     source("~/Dropbox/TerryLai/R_code/abcmcmc/oubmbmabcmcmc.r")
     print(model)
     estOU <-getOUest(Y=resptrait,tree=tree)
     olssum <- summary(lm(resptrait~predtrait1+predtrait2))
-    #ls(olssum)
     sigup<-sigsqx.upper(predtrait1=predtrait1,predtrait2=predtrait2)
     regbound<-regboundfcn(olssum=olssum)
     alpha.y.min = 0.67*estOU$alpha
@@ -31,7 +30,7 @@ abcmcmc <- function(tree=tree, resptrait=resptrait, predtrait1=predtrait1,predtr
     b1.max=regbound[4]
     b2.min=regbound[5]
     b2.max=regbound[6]
-    # 
+    
     prior.model.params=c(alpha.y.min,alpha.y.max, sigma.x.min, sigma.x.max, tau.min, tau.max)
     
     names(prior.model.params)<-c("alpha.y.min","alpha.y.max", "sigma.x.min", "sigma.x.max", "tau.min", "tau.max") 
@@ -49,7 +48,6 @@ abcmcmc <- function(tree=tree, resptrait=resptrait, predtrait1=predtrait1,predtr
   }
   
   if(model == "ououbm"){
-    #source("/Users/Administrator/Dropbox/TerryLai/R_code/abcmcmc/ououbmabcmcmc.r")
     source("~/Dropbox/TerryLai/R_code/abcmcmc/ououbmabcmcmc.r")
     print(model)
     estOU <-getOUest(Y=resptrait,tree=tree)
@@ -57,7 +55,7 @@ abcmcmc <- function(tree=tree, resptrait=resptrait, predtrait1=predtrait1,predtr
     estOUpred2 <- getOUest(Y=predtrait2, tree=tree) 
     
     olssum <- summary(lm(resptrait~predtrait1+predtrait2))
-    #ls(olssum)
+
     sigup<-sigsqx.upper(predtrait1=predtrait1,predtrait2=predtrait2)
     regbound<-regboundfcn(olssum=olssum)
     
@@ -94,7 +92,7 @@ abcmcmc <- function(tree=tree, resptrait=resptrait, predtrait1=predtrait1,predtr
     return(ououbmresult=ououbmresult)
   }
   if(model == "oubmcir"){
-    #source("/Users/Administrator/Dropbox/TerryLai/R_code/abcmcmc/oubmcirabcmcmc.r")
+
     source("~/Dropbox/TerryLai/R_code/abcmcmc/oubmcirabcmcmc.r")
     print(model)
     estOU <-getOUest(Y=resptrait,tree=tree)
@@ -133,7 +131,7 @@ abcmcmc <- function(tree=tree, resptrait=resptrait, predtrait1=predtrait1,predtr
     return(oubmcirresult=oubmcirresult)
   }
   if(model == "ououcir"){
-    #source("/Users/Administrator/Dropbox/TerryLai/R_code/abcmcmc/ououcirabcmcmc.r")
+
     source("~/Dropbox/TerryLai/R_code/abcmcmc/ououcirabcmcmc.r")
     print(model)
     estOU <-getOUest(Y=resptrait,tree=tree)
