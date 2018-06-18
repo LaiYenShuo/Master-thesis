@@ -42,24 +42,17 @@ oubmcirmodel<-function(model.params,reg.params,root=root,tree=tree){
     c<- sigma.tau^2*(1-exp(-alpha.tau*treelength[index]))/(4*alpha.tau)
     k<- (4*theta.tau*alpha.tau)/sigma.tau^2
     lambda<-4*alpha.tau*exp(-alpha.tau*treelength[index])/(sigma.tau^2*(1-exp(-alpha.tau*treelength[index])))*sigmasqnodestates[anc[index]]
-    
-    #print(lambda)
-    
+
     tmp = rchisq(n=1, df=k, ncp = lambda)
     sig_u <- c*tmp
     sigmasqnodestates[des[index]]<-sig_u
     
     sigma.sq.theta<- b1^2*sigma.x^2 + b2^2*sigma.x^2
-    #inttheta<-integrate(oubmbmintegrand,lower=0 ,upper=treelength[index], alpha.y=true.alpha.y)
-    
-    #INT1var<-treelength[index]*exp(2*alpha.y*treelength[index]) - 2*(exp(2*alpha.y*treelength[index])-exp(alpha.y*treelength[index])) + alpha.y/2*(exp(2*alpha.y*treelength[index])-1)
     
     INT1mean<- optimnodestates[des[index]]*exp(alpha.y*treelength[index])  - optimnodestates[anc[index]]
     INT1var<- (exp(2*alpha.y*treelength[index])-1)/ (2*alpha.y)
     
     INT1<-exp(-alpha.y*treelength[index])* rnorm(n=1,mean= INT1mean, sd=sqrt(abs(INT1var)))
-    
-    #    INT1<-exp(-alpha.y*treelength[index])* rnorm(n=1,mean= optimnodestates[anc[index]]*(exp(alpha.y*treelength[index])-1),sd=sqrt(abs(INT1var)))
     
     a <- rnorm(n=1, mean=0, sd=sqrt(theta.tau^2*(exp(2*alpha.y*treelength[index])-1)/(2*alpha.y)))
     b <- rnorm(n=1, mean=0, sd=sqrt(((sigmasqnodestates[des[index]]-theta.tau)^2/(2*(alpha.y-alpha.tau)))*(exp(2*(alpha.y-alpha.tau)*treelength[index])-1)))
@@ -187,55 +180,32 @@ oubmcirproposal <- function(param=param,regbound=regbound,sigup=sigup){
 }
 
 oubmcir_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1=x1,x2=x2, regbound=regbound,sigup=sigup, tree=tree, rootvalue=rootvalue, errorbound=errorbound){
-  
-  #y<- resptrait
-  #x1<-predtrait1
-  #x2<-predtrait2
-  
+
   S0y <- sum.stat(trait = y, tree = tree)
   S0x1 <- sum.stat(trait = x1, tree = tree)
   S0x2 <- sum.stat(trait = x2, tree = tree)
   S0<-c(S0y,S0x1,S0x2)
-  #print(S0)
+
   distS0S1 <- c()
   chain = array(dim=c(iterations+1,8))
   chain[1,] = startvalue
   for (i in 1:iterations){
     if(i %%5000==0){print(paste("oubmcir",i,sep=""))}
-    #print(i)
-    #    Sys.sleep(1)
     proposal <- oubmcirproposal(chain[i,],regbound=regbound, sigup=sigup)
-    # print(proposal)
     simD <- oubmcirmodel(model.params=proposal[1:5],reg.params=proposal[6:8],root=rootvalue,tree=tree)
   
-    # print(y)
-    # print(simD$y)
-    # print("-------------------------")
-    # print(x1)
-    # print(simD$x1)
-    # print("-------------------------")
-    # print(x2)
-    # print(simD$x2)
-    # print("-------------------------")
-    
     S1y <- sum.stat(trait = simD$y, tree=tree)
     S1x1 <- sum.stat(trait = simD$x1, tree=tree)
     S1x2 <- sum.stat(trait = simD$x2, tree=tree)
     S1<-c(S1y,S1x1,S1x2)  
-     #print(S0)
-     #print(S1)
-    #print(dist(rbind(S0,S1)))
-    # cat("\n\n")
-    # 
+
     distS0S1 <- c(distS0S1,dist(rbind(S0,S1)))
     if(dist(rbind(S0,S1))<errorbound){
       priorratio <- exp(d.oubmcirprior(proposal, regbound=regbound,sigup=sigup)-d.oubmcirprior(chain[i,],regbound=regbound,sigup=sigup))
       h=min(1,priorratio)
       if(runif(1)<h){
         chain[i+1,]=proposal
-        #S0 <- S1
-        #print("updated proposal successful")
-        #print(c(i,proposal))
+
       }else{
         chain[i+1,]=chain[i,]
       }
@@ -248,8 +218,6 @@ oubmcir_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x
 
 sum.stat<-function(trait=trait,tree=tree){
   pic.trait<-pic(x=trait,phy=tree)
-  #print("oubmcir pic mean and pic sd")
-  #print(c(mean(pic.trait),sd(pic.trait)))
   return(c(mean(pic.trait),sd(pic.trait)))
 }
 
