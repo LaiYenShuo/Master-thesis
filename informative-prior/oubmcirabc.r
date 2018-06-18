@@ -45,14 +45,10 @@ oubmcirmodel<-function(model.params,reg.params,root=root,tree=tree){
     sigmasqnodestates[des[index]]<-sig_u
 
     sigma.sq.theta<- b1^2*sigma.x^2 + b2^2*sigma.x^2
-    #inttheta<-integrate(oubmbmintegrand,lower=0 ,upper=treelength[index], alpha.y=true.alpha.y)
-
-    #INT1var<-treelength[index]*exp(2*alpha.y*treelength[index]) - 2*(exp(2*alpha.y*treelength[index])-exp(alpha.y*treelength[index])) + alpha.y/2*(exp(2*alpha.y*treelength[index])-1)
-    INT1mean<- optimnodestates[des[index]]*exp(alpha.y*treelength[index])  - optimnodestates[anc[index]]
+        INT1mean<- optimnodestates[des[index]]*exp(alpha.y*treelength[index])  - optimnodestates[anc[index]]
     INT1var<- (exp(2*alpha.y*treelength[index])-1)/ (2*alpha.y)
     
     INT1<-exp(-alpha.y*treelength[index])* rnorm(n=1,mean= INT1mean, sd=sqrt(abs(INT1var)))
-    #INT1<-exp(-alpha.y*treelength[index])* rnorm(n=1,mean=0,sd=sqrt(abs(INT1var)))
 
     a <- rnorm(n=1, mean=0, sd=sqrt(theta.tau^2*(exp(2*alpha.y*treelength[index])-1)/(2*alpha.y)))
     b <- rnorm(n=1, mean=0, sd=sqrt(((sigmasqnodestates[des[index]]-theta.tau)^2/(2*(alpha.y-alpha.tau)))*(exp(2*(alpha.y-alpha.tau)*treelength[index])-1)))
@@ -120,124 +116,3 @@ sum.stat.distance<-function(raw.sum.stat=raw.sum.stat,sim.sum.stat=sim.sum.stat)
   sim.sum.stat <- sim.sum.stat/median(sim.sum.stat-median(sim.sum.stat))
   return(sum((raw.sum.stat-sim.sum.stat)^2))
 }
-# ### main
-# n<-20
-# numbsim<-1;lambda<-2.0;mu<-0.5;frac<-0.6;age<-2
-# tree<-sim.bd.taxa.age(n=n,numbsim=1,lambda=lambda,mu=mu,frac=frac,age=age,mrca=TRUE)[[1]]
-# tree<-reorder(tree,"postorder")
-# tree$edge
-# plot(tree)
-# nodelabels()
-# tiplabels()
-# 
-# root<-1
-# true.alpha.y<-1
-# true.sigma.x<-2
-# true.alpha.tau<-0.5
-# true.theta.tau<-3
-# true.sigma.tau<- 1
-# n_s = 10
-# n_t = 10
-# true.b0 <- 0
-# true.b1 <- 1
-# true.b2 <- 0.2
-# # hyper paramters
-# alpha.y.rate <-5# assume exponential
-# sigma.x.shape <-2# assume invgamma
-# sigma.x.scale <-1
-# alpha.tau.rate <- 5# assume exponential
-# theta.tau.a <- 0 #assume uniform
-# theta.tau.b <- 100
-# sigma.tau.shape <- 2# assume inv gamma
-# sigma.tau.scale <- 1
-# b0.min=-5
-# b0.max=5
-# b1.min=-5
-# b1.max=5
-# b2.min=-5
-# b2.max=5
-# 
-# prior.model.params=c(alpha.y.rate, sigma.x.shape, sigma.x.scale, alpha.tau.rate, theta.tau.a, theta.tau.b, sigma.tau.shape, sigma.tau.scale)
-# names(prior.model.params)<-c("alpha.y.rate", "sigma.x.shape", "sigma.x.scale", "alpha.tau.rate", "theta.tau.a", "theta.tau.b", "sigma.tau.shape", "sigma.tau.scale")
-# prior.reg.params=c(b0.min, b0.max, b1.min, b1.max, b2.min, b2.max)
-# prior.params <- oubmcirprior(prior.model.params = prior.model.params, prior.reg.params=prior.reg.params)
-# 
-# true.trait <- oubmcirmodel(model.params = c(true.alpha.y, true.sigma.x, true.alpha.tau, true.theta.tau, true.sigma.tau),reg.params = c(true.b0,true.b1,true.b2), root=root, tree=tree)
-# sim.trait <- oubmcirmodel(model.params = prior.params$model.params, reg.params = prior.params$reg.params, root=root, tree=tree)
-# 
-# raw.sum.stat.y <- sum.stat(trait = true.trait$y, tree=tree)
-# raw.sum.stat.x1 <- sum.stat(trait = true.trait$x1, tree=tree)
-# raw.sum.stat.x2 <- sum.stat(trait = true.trait$x2, tree=tree)
-# 
-# sims=50000
-# sim.oubmcir.trait<-array(0,c(n,3,sims))
-# model.params.array<-array(0,c(5,sims))
-# rownames(model.params.array)<-c("alpha.y","sigma.x","alpha.tau","theta.tau","sigma.tau")
-# reg.params.array<-array(0,c(3,sims))
-# row.names(reg.params.array)<-c("b0", "b1", "b2")
-# y.sum.stat.array<-array(0,c(2,sims))
-# rownames(y.sum.stat.array)<-c("y.mean","y.sd")
-# x1.sum.stat.array<-array(0,c(2,sims))
-# rownames(x1.sum.stat.array)<-c("x1.mean","x1.sd")
-# x2.sum.stat.array<-array(0,c(2,sims))
-# rownames(x2.sum.stat.array)<-c("x2.mean","x2.sd")
-# 
-# 
-# prior.params <- oubmcirprior(prior.model.params = prior.model.params, prior.reg.params = prior.reg.params)
-# sum.stat.distance.array<-array(0,c(sims))
-# for(simIndex in 1:sims){
-#   if(simIndex %%1000==0){print(simIndex)}
-#   prior.params<-oubmcirprior(prior.model.params = prior.model.params, prior.reg.params = prior.reg.params)
-#   model.params.array[,simIndex]<-prior.params$model.params#for record only
-#   reg.params.array[,simIndex]<-prior.params$reg.params#for record only
-# 
-#   sim.trait <-oubmcirmodel(model.params=prior.params$model.params,reg.params=prior.params$reg.params,root=root,tree=tree)
-#   sim.oubmcir.trait[,1,simIndex]<-sim.trait$y
-#   sim.oubmcir.trait[,2,simIndex]<-sim.trait$x1
-#   sim.oubmcir.trait[,3,simIndex]<-sim.trait$x2
-#   y.sum.stat.array[,simIndex]<- sum.stat(trait=sim.trait$y,tree=tree)
-#   x1.sum.stat.array[,simIndex]<- sum.stat(trait=sim.trait$x1,tree=tree)
-#   x2.sum.stat.array[,simIndex]<- sum.stat(trait=sim.trait$x2,tree=tree)
-# }# end of loop
-# 
-# ### Use abc package
-# sim.sum.stat <- cbind(t(y.sum.stat.array),t(x1.sum.stat.array),t(x2.sum.stat.array))
-# oubmcir.par.sim <- cbind(t(model.params.array),t(reg.params.array))
-# setwd("/Users/TerryLai/Dropbox/TerryLai/R_code/abc_V2")
-# #setwd("~/Dropbox/FCU/Teaching/Mentoring/2017Spring/TerryLai/R_code/abc_V2/")
-# save.image("test_oubmcir.RData")
-# ### The rejection alogortim
-# rej <- abc(target=c(raw.sum.stat.y,raw.sum.stat.x1,raw.sum.stat.x2), param=oubmcir.par.sim, sumstat=sim.sum.stat, tol=0.05, method="rejection"  )
-# ls(rej)
-# rej[1:12]
-# ## ABC with local linear regression correction without/with correction
-# ## for heteroscedasticity
-# ##
-# 
-# lin <- abc(target=c(raw.sum.stat.y,raw.sum.stat.x1,raw.sum.stat.x2), param=oubmcir.par.sim, sumstat=sim.sum.stat, tol=0.2,hcorr=FALSE, method="loclinear",transf = c("log","log","log","log","log","log","log","log"))
-# ls(lin)
-# lin[c(1:18)]
-# linhc <- abc(target=c(raw.sum.stat.y,raw.sum.stat.x1,raw.sum.stat.x2), param=oubmcir.par.sim, sumstat=sim.sum.stat, tol=0.2, method="loclinear", transf=c("log","log","log","log","log","log","log","log"))
-# ls(linhc)
-# linhc[c(1:18)]
-# head(lin$adj.values);head(linhc$adj.values)
-# ## posterior summaries
-# ##
-# linhc$adj.values
-# linsum <- summary(linhc, intvl=0.9)
-# linsum
-# ## compare with the rejection sampling
-# summary(linhc, unadj=TRUE, intvl=0.9)
-# ## posterior histograms
-# ##
-# ## or send histgrams to pdf file
-# hist(linhc, breaks=30, caption=c(
-#   expression(alpha[y]),
-#   expression(sigma[x]),
-#   expression(alpha[tau]),
-#   expression(theta[tau]),
-#   expression(sigma[tau]),
-#   expression(b[0]),
-#   expression(b[1]),
-#   expression(b[2])))
-# 
