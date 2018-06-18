@@ -50,7 +50,6 @@ ououbmmodel<-function(model.params,reg.params,root=root,tree=tree){
     
     sigmasqnodestates[des[index]]<-rnorm(n=1,mean=sigmasqnodestates[anc[index]],sd=sqrt(tau*treelength[index]))
     sigma.sq.theta<- b1^2*sigma.x^2 + b2^2*sigma.x^2
-    #inttheta<-integrate(oubmbmintegrand,lower=0 ,upper=treelength[index], alpha.y=true.alpha.y)
     
     A1<-(alpha.y*optimnodestates[des[index]]/ (alpha.y-alpha.x)) *(exp((alpha.y-alpha.x)*treelength[index]) -1)
     theta1<-0
@@ -68,7 +67,7 @@ ououbmmodel<-function(model.params,reg.params,root=root,tree=tree){
   
   simtrait<-ynodestates[1:n]
   return(list(y=simtrait,x1=x1nodestates[1:n],x2=x2nodestates[1:n]))
-  #return(c(mean(simtrait),sd(simtrait)))
+
 }
 
 ououbmprior<-function(prior.model.params=prior.model.params,prior.reg.params=prior.reg.params){
@@ -115,29 +114,15 @@ d.ououbmprior <- function(param=param,regbound=regbound,sigup=sigup){
   b1 <- param[7]
   b2 <- param[8]
   prior.alpha.y <- dexp(alpha.y, rate=1/10, log=T)
-  
-  #print(paste("ay",prior.alpha.y,sep=" "))
-
   prior.alpha.x <- dexp(alpha.x, rate=1/10, log=T)
-  
-  #print(paste("ax",prior.alpha.x,sep=" "))
   prior.theta.x <- dnorm(theta.x, mean=mean(regbound[1],regbound[2]), sd=(regbound[2]-regbound[1])/3, log=T)
-  #print(paste("tx",prior.theta.x, theta.x, regbound[1],regbound[2],sep=" "))
   prior.sigma.x <- dexp(sigma.x, rate=1/sigup, log=T)
-  #print(paste("sx",prior.sigma.x, sigma.x,sep=" "))
-  
   prior.tau <- dexp(tau, rate=1/sigup, log=T)
-  #print(paste("tau",prior.tau, tau,sigup,sep=" "))
   
   prior.b0 <- dnorm(b0, mean=mean(regbound[1],regbound[2]), sd=(regbound[2]-regbound[1])/3, log=T)
   prior.b1 <- dunif(b1, min=regbound[3], max=regbound[4], log=T)
   prior.b2 <- dunif(b2, min=regbound[5], max=regbound[6], log=T)
   
-  # print(prior.alpha.x)
-  # print(prior.theta.x)
-  # print(prior.sigma.x)
-  # print(prior.tau)
-  # 
   log.prior<-sum(prior.alpha.y,prior.alpha.x,prior.theta.x,prior.sigma.x,prior.tau,prior.b0,prior.b1,prior.b2)
   return(log.prior)
 }
@@ -177,11 +162,7 @@ ououbmproposal <- function(param=param,regbound=regbound,sigup=sigup){
 }
 
 ououbm_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1=x1,x2=x2, regbound=regbound,sigup=sigup, tree=tree, rootvalue=rootvalue, errorbound=errorbound){
-  
-  #y<- resptrait
-  #x1<-predtrait1
-  #x2<-predtrait2
-  
+
   S0y <- sum.stat(trait = y, tree = tree)
   S0x1 <- sum.stat(trait = x1, tree = tree)
   S0x2 <- sum.stat(trait = x2, tree = tree)
@@ -191,36 +172,25 @@ ououbm_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1
   chain[1,] = startvalue
   for (i in 1:iterations){
     if(i %%5000==0){print(paste("ououbm",i,sep=""))}
-    #print(i)
-    #    Sys.sleep(1)
+
     proposal <- ououbmproposal(chain[i,],regbound=regbound, sigup=sigup)
-    # print(proposal)
+
     simD <- ououbmmodel(model.params=proposal[1:5],reg.params=proposal[6:8],root=rootvalue,tree=tree)
     
     S1y <- sum.stat(trait = simD$y, tree=tree)
     S1x1 <- sum.stat(trait = simD$x1, tree=tree)
     S1x2 <- sum.stat(trait = simD$x2, tree=tree)
     S1<-c(S1y,S1x1,S1x2)  
-    # print(S0)
-    # print(S1)
-    #print(dist(rbind(S0,S1)))
-    # cat("\n\n")
-    # 
+
     distS0S1 <- c(distS0S1,dist(rbind(S0,S1)))
     if(dist(rbind(S0,S1))<errorbound){
-      # print(proposal)
-      # print(chain[i,])
-      # print(d.ououbmprior(proposal, regbound=regbound,sigup=sigup))
-      # print(d.ououbmprior(chain[i,], regbound=regbound,sigup=sigup))
-      # 
+
       priorratio <- exp(d.ououbmprior(proposal, regbound=regbound,sigup=sigup)-d.ououbmprior(chain[i,],regbound=regbound,sigup=sigup))
       print(priorratio)
       h=min(1,priorratio)
       if(runif(1)<h){
         chain[i+1,]=proposal
-        #S0 <- S1
-        #print("updated proposal successful")
-        #print(c(i,proposal))
+
       }else{
         chain[i+1,]=chain[i,]
       }
@@ -233,8 +203,7 @@ ououbm_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1
 
 sum.stat<-function(trait=trait,tree=tree){
   pic.trait<-pic(x=trait,phy=tree)
-  #print("pic mean and pic sd")
-  #print(c(mean(pic.trait),sd(pic.trait)))
+
   return(c(mean(pic.trait),sd(pic.trait)))
 }
 
