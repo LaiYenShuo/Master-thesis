@@ -36,39 +36,24 @@ oubmbmmodel<-function(model.params,reg.params,root=root,tree=tree){
     x1nodestates[des[index]]<-rnorm(n=1,mean=x1nodestates[anc[index]],sd= sqrt(sigma.x^2*treelength[index]))
     x2nodestates[des[index]]<-rnorm(n=1,mean=x2nodestates[anc[index]],sd= sqrt(sigma.x^2*treelength[index]))
     
-    
-    #check y
     optimnodestates[des[index]]<- b0 + b1*x1nodestates[des[index]] + b2*x2nodestates[des[index]]
-#    sigmasqnodestates[des[index]]<-rnorm(n=1,mean=sigmasqnodestates[anc[index]],sd=sqrt(tau*treelength[index]))
-    sigma.sq.theta<- b1^2*sigma.x^2 + b2^2*sigma.x^2
-    #inttheta<-integrate(oubmbmintegrand,lower=0 ,upper=treelength[index], alpha.y=true.alpha.y)
-    
-    #INT1var<-treelength[index]*exp(2*alpha.y*treelength[index]) - 2*(exp(2*alpha.y*treelength[index])-exp(alpha.y*treelength[index])) + alpha.y/2*(exp(2*alpha.y*treelength[index])-1)
 
+    sigma.sq.theta<- b1^2*sigma.x^2 + b2^2*sigma.x^2
+   
         INT1mean<- optimnodestates[des[index]]*exp(alpha.y*treelength[index])  - optimnodestates[anc[index]]
         INT1var<-  (exp(2*alpha.y*treelength[index])-1)/ (2*alpha.y)
         print(c(INT1mean,INT1var))
         INT1<-exp(-alpha.y*treelength[index])* rnorm(n=1,mean= INT1mean, sd=sqrt(abs(INT1var)))
-        
-#    INT1<-exp(-alpha.y*treelength[index])* rnorm(n=1,mean= optimnodestates[anc[index]]*(exp(alpha.y*treelength[index])-1),sd=sqrt(abs(INT1var)))
-    #print(alpha.y)
+    
     fexpr<-expression(exp(alpha.y*t)*w)
-    #print(alpha.y)
+
     res<-st.int(fexpr,type="ito",M=1,lower=0,upper=treelength[index])
-    # res<-st.int(fexpr,type="ito",M=1,lower=0,upper=treelength[index])
-    INT2<-exp(-alpha.y*treelength[index])*tau*median(res$X)
+      INT2<-exp(-alpha.y*treelength[index])*tau*median(res$X)
     ynodestates[des[index]]<-ynodestates[anc[index]] + INT1 + INT2
   }
   
    simtrait<-ynodestates[1:n]
-  # print("x2")
-  # print(x2nodestates[1:n])
-  # print("x1")
-  # print(x1nodestates[1:n])
-  # print("y")
-  # print(simtrait)
-  return(list(y=simtrait,x1=x1nodestates[1:n],x2=x2nodestates[1:n]))
-  #return(c(mean(simtrait),sd(simtrait)))
+   return(list(y=simtrait,x1=x1nodestates[1:n],x2=x2nodestates[1:n]))
 }
 
 oubmbmprior<-function(prior.model.params=prior.model.params,prior.reg.params=prior.reg.params){
@@ -147,11 +132,7 @@ oubmbmproposal <- function(param=param,regbound=regbound,sigup=sigup){
 
 
 oubmbm_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1=x1,x2=x2, regbound=regbound,sigup=sigup, tree=tree, rootvalue=rootvalue, errorbound=errorbound){
-   
-  #y<- resptrait
-  #x1<-predtrait1
-  #x2<-predtrait2
-  #print(y)
+
   S0y <- sum.stat(trait = y, tree = tree)
   S0x1 <- sum.stat(trait = x1, tree = tree)
   S0x2 <- sum.stat(trait = x2, tree = tree)
@@ -162,35 +143,24 @@ oubmbm_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1
   chain = array(dim=c(iterations+1,6))
   chain[1,] = startvalue
   for (i in 1:iterations){
-    #if( i %%5000==0){print(paste("oubmbm",i,sep=""))}
-    print(i)
-#    Sys.sleep(1)
+    if( i %%5000==0){print(paste("oubmbm",i,sep=""))}
+    #print(i)
     proposal <- oubmbmproposal(chain[i,],regbound=regbound, sigup=sigup)
-     print(proposal)
+    #print(proposal)
     simD <- oubmbmmodel(model.params=proposal[1:3],reg.params=proposal[4:6],root=rootvalue,tree=tree)
-
-    # print(round(y,2))
-    # print(round(simD$y,2))
-        
+    
     S1y <- sum.stat(trait = simD$y, tree=tree)
     S1x1 <- sum.stat(trait = simD$x1, tree=tree)
     S1x2 <- sum.stat(trait = simD$x2, tree=tree)
     S1<-c(S1y,S1x1,S1x2)  
-    # print(S0)
-    # print(S1)
-    #print(dist(rbind(S0,S1)))
-    # cat("\n\n")
-    # 
-    
+
     distS0S1<-c(distS0S1,dist(rbind(S0,S1)))
     if(dist(rbind(S0,S1))<errorbound){
       priorratio <- exp(d.oubmbmprior(proposal, regbound=regbound,sigup=sigup)-d.oubmbmprior(chain[i,],regbound=regbound,sigup=sigup))
       h=min(1,priorratio)
       if(runif(1)<h){
         chain[i+1,]=proposal
-        #S0 <- S1
-        #print("updated proposal successful")
-        #print(proposal)
+
       }else{
         chain[i+1,]=chain[i,]
       }
@@ -203,8 +173,6 @@ oubmbm_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1
 
 sum.stat<-function(trait=trait,tree=tree){
   pic.trait<-pic(x=trait,phy=tree)
-  #print("pic mean and pic sd")
-  #print(c(mean(pic.trait),sd(pic.trait)))
   return(c(mean(pic.trait),sd(pic.trait)))
 }
 
