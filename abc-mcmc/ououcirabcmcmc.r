@@ -204,55 +204,32 @@ ououcirproposal <- function(param=param,regbound=regbound,sigup=sigup){
 }
 
 ououcir_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x1=x1,x2=x2, regbound=regbound,sigup=sigup, tree=tree, rootvalue=rootvalue, errorbound=errorbound){
-  
-  #y<- resptrait
-  #x1<-predtrait1
-  #x2<-predtrait2
-  
+
   S0y <- sum.stat(trait = y, tree = tree)
   S0x1 <- sum.stat(trait = x1, tree = tree)
   S0x2 <- sum.stat(trait = x2, tree = tree)
   S0<-c(S0y,S0x1,S0x2)
-  #print(S0)
   distS0S1 <- c()
   chain = array(dim=c(iterations+1,10))
   chain[1,] = startvalue
   for (i in 1:iterations){
     if(i %%5000==0){print(paste("ououcir",i,sep=""))}
-    #print(i)
-    #    Sys.sleep(1)
+
     proposal <- ououcirproposal(chain[i,],regbound=regbound, sigup=sigup)
-    # print(proposal)
     simD <- ououcirmodel(model.params=proposal[1:7],reg.params=proposal[8:10],root=rootvalue,tree=tree)
-    
-    # print(y)
-    # print(simD$y)
-    # print("-------------------------")
-    # print(x1)
-    # print(simD$x1)
-    # print("-------------------------")
-    # print(x2)
-    # print(simD$x2)
-    # print("-------------------------")
-    
+
     S1y <- sum.stat(trait = simD$y, tree=tree)
     S1x1 <- sum.stat(trait = simD$x1, tree=tree)
     S1x2 <- sum.stat(trait = simD$x2, tree=tree)
     S1<-c(S1y,S1x1,S1x2)  
-    # print(S0)
-    # print(S1)
-    # print(dist(rbind(S0,S1)))
-    # cat("\n\n")
-    # 
+
     distS0S1 <- c(distS0S1,dist(rbind(S0,S1)))
     if(dist(rbind(S0,S1))<errorbound){
       priorratio <- exp(d.ououcirprior(proposal, regbound=regbound,sigup=sigup)-d.ououcirprior(chain[i,],regbound=regbound,sigup=sigup))
       h=min(1,priorratio)
       if(runif(1)<h){
         chain[i+1,]=proposal
-        #S0 <- S1
-        #print("updated proposal successful")
-        #print(c(i,proposal))
+     
       }else{
         chain[i+1,]=chain[i,]
       }
@@ -265,8 +242,7 @@ ououcir_abc_MCMC <- function(startvalue=startvalue, iterations=iterations, y=y,x
 
 sum.stat<-function(trait=trait,tree=tree){
   pic.trait<-pic(x=trait,phy=tree)
-  #print("pic mean and pic sd")
-  #print(c(mean(pic.trait),sd(pic.trait)))
+
   return(c(mean(pic.trait),sd(pic.trait)))
 }
 
