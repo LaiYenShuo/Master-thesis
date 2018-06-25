@@ -111,6 +111,3 @@ plot(cv.res.rej.oubmcir,caption = c(expression(mu[y]),expression(sigma[y]),expre
 plot(cv.res.rej.ououcir,caption = c(expression(mu[y]),expression(sigma[y]),expression(mu[x[1]]),expression(sigma[x[1]]),expression(mu[x[2]]),expression(sigma[x[2]])))
 
 res <- abc(target = raw.sum.stat,param= ,sumstat=full.stat.sim.sum, tol=0.05, method="rejection")
-
-
-res <- abc(target=raw.sum.stat, param = )
